@@ -1,6 +1,10 @@
 package vahren.fr.bladesclockapp;
 
+import android.app.DialogFragment;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,15 +13,37 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridView;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import static android.graphics.Paint.ANTI_ALIAS_FLAG;
+
+public class MainActivity extends AppCompatActivity implements CreateClockMenu.CreateClockMenuListener {
 
 
     private GridView grid;
     private ClockAdapter clocks;
+    private boolean showingMenu = true;
+    private Animation show_fab_1;
+    private Animation hide_fab_1;
+    private Animation show_fab_2;
+    private Animation hide_fab_2;
+    private Animation show_fab_3;
+    private Animation hide_fab_3;
+
+
+    private final Bitmap fab4 = bitmapClock(4,40, Color.WHITE);
+    private final Bitmap fab6 = bitmapClock(6,40, Color.WHITE);
+    private final Bitmap fab8 = bitmapClock(8,40, Color.WHITE);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,14 +52,78 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        // ANIMATIONS
+        show_fab_1 = AnimationUtils.loadAnimation(this, R.anim.fab1_show);
+        hide_fab_1 = AnimationUtils.loadAnimation(this, R.anim.fab1_hide);
+        show_fab_2 = AnimationUtils.loadAnimation(this, R.anim.fab2_show);
+        hide_fab_2 = AnimationUtils.loadAnimation(this, R.anim.fab2_hide);
+        show_fab_3 = AnimationUtils.loadAnimation(this, R.anim.fab3_show);
+        hide_fab_3 = AnimationUtils.loadAnimation(this, R.anim.fab3_hide);
+
+        // FABS
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                showFabMenu();
             }
         });
+        FloatingActionButton fab1 = findViewById(R.id.fab_4);
+        fab1.setImageBitmap(fab4);
+        fab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAddClockMenu(4);
+            }
+        });
+        FloatingActionButton fab2 = findViewById(R.id.fab_6);
+        fab2.setImageBitmap(fab6);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAddClockMenu(6);
+            }
+        });
+        FloatingActionButton fab3 = findViewById(R.id.fab_8);
+        fab3.setImageBitmap(fab8);
+        fab3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAddClockMenu(8);
+            }
+        });
+
+        // TAGS
+        CheckBox score = findViewById(R.id.scoreToggle);
+        score.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                clocks.setScore(b);
+            }
+        });
+        CheckBox pc = findViewById(R.id.pcToggle);
+        pc.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                clocks.setPc(b);
+            }
+        });
+        CheckBox general = findViewById(R.id.generalToggle);
+        general.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                clocks.setGeneral(b);
+            }
+        });
+        CheckBox hidden = findViewById(R.id.hiddenToggle);
+        hidden.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                clocks.setHidden(b);
+            }
+        });
+
+        // GRID
         this.grid = findViewById(R.id.grid);
         this.grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -50,13 +140,76 @@ public class MainActivity extends AppCompatActivity {
         });
 
         this.clocks = new ClockAdapter(this);
-
-        // TEST
-        clocks.addNewClock(4,  "Exemple clock 1");
-        clocks.addNewClock(6, "Exemple clock 2");
-        clocks.addNewClock(8, "Exemple clock 3");
         grid.setAdapter(clocks);
 
+    }
+
+    private void showAddClockMenu(int nbSector) {
+        // show popup with one field for name
+        // and tags checkboxes
+        DialogFragment menu = new CreateClockMenu();
+        Bundle args = new Bundle();
+        args.putInt("nbSector",nbSector);
+        menu.setArguments(args);
+        menu.show(getFragmentManager(), "createClock");
+    }
+
+    private void showFabMenu() {
+        FloatingActionButton fab1 = findViewById(R.id.fab_4);
+        FloatingActionButton fab2 = findViewById(R.id.fab_6);
+        FloatingActionButton fab3 = findViewById(R.id.fab_8);
+        if(this.showingMenu){
+            // First button
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) fab1.getLayoutParams();
+            layoutParams.rightMargin += (int) (fab1.getWidth() * 1.7);
+            layoutParams.bottomMargin += (int) (fab1.getHeight() * 0.25);
+            fab1.setLayoutParams(layoutParams);
+            fab1.startAnimation(show_fab_1);
+            fab1.setClickable(true);
+            fab1.setVisibility(View.VISIBLE);
+
+            layoutParams = (FrameLayout.LayoutParams) fab2.getLayoutParams();
+            layoutParams.rightMargin += (int) (fab2.getWidth() * 1.5);
+            layoutParams.bottomMargin += (int) (fab2.getHeight() * 1.5);
+            fab2.setLayoutParams(layoutParams);
+            fab2.startAnimation(show_fab_2);
+            fab2.setClickable(true);
+            fab2.setVisibility(View.VISIBLE);
+
+            layoutParams = (FrameLayout.LayoutParams) fab3.getLayoutParams();
+            layoutParams.rightMargin += (int) (fab3.getWidth() * 0.25);
+            layoutParams.bottomMargin += (int) (fab3.getHeight() * 1.7);
+            fab3.setLayoutParams(layoutParams);
+            fab3.startAnimation(show_fab_3);
+            fab3.setClickable(true);
+            fab3.setVisibility(View.VISIBLE);
+        }else{
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) fab1.getLayoutParams();
+            layoutParams.rightMargin -= (int) (fab1.getWidth() * 1.7);
+            layoutParams.bottomMargin -= (int) (fab1.getHeight() * 0.25);
+            fab1.setLayoutParams(layoutParams);
+            fab1.startAnimation(hide_fab_1);
+            fab1.setClickable(false);
+            fab1.setVisibility(View.INVISIBLE);
+
+            layoutParams = (FrameLayout.LayoutParams) fab2.getLayoutParams();
+            layoutParams.rightMargin -= (int) (fab2.getWidth() * 1.5);
+            layoutParams.bottomMargin -= (int) (fab2.getHeight() * 1.5);
+            fab2.setLayoutParams(layoutParams);
+            fab2.startAnimation(hide_fab_2);
+            fab2.setClickable(false);
+            fab2.setVisibility(View.INVISIBLE);
+
+            layoutParams = (FrameLayout.LayoutParams) fab3.getLayoutParams();
+            layoutParams.rightMargin -= (int) (fab3.getWidth() * 0.25);
+            layoutParams.bottomMargin -= (int) (fab3.getHeight() * 1.7);
+            fab3.setLayoutParams(layoutParams);
+            fab3.startAnimation(hide_fab_3);
+            fab3.setClickable(false);
+            fab3.setVisibility(View.INVISIBLE);
+        }
+
+        this.showingMenu = !this.showingMenu;
     }
 
     @Override
@@ -79,5 +232,41 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDialogPositiveClick(CreateClockMenu dialog) {
+
+        clocks.addNewClock(dialog.nbSector,
+                ((EditText)dialog.getDialog().findViewById(R.id.nameInput)).getText().toString(),
+                ((CheckBox)dialog.getDialog().findViewById(R.id.score)).isChecked(),
+                ((CheckBox)dialog.getDialog().findViewById(R.id.PC)).isChecked(),
+                ((CheckBox)dialog.getDialog().findViewById(R.id.general)).isChecked(),
+                ((CheckBox)dialog.getDialog().findViewById(R.id.hidden)).isChecked());
+    }
+
+    @Override
+    public void onDialogNegativeClick(CreateClockMenu dialog) {
+        // NOTHING
+    }
+
+
+    public static Bitmap bitmapClock(int n, int textSize, int textColor) {
+
+
+        Paint circlePaint = new Paint(ANTI_ALIAS_FLAG);
+        circlePaint.setColor(textColor);
+        int padding = 2;
+        int width = 2*padding + textSize; // round
+        int height = 2*padding + textSize;
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(image);
+        int angleStep = 360 / n;
+        // draw as many arc as the sector number
+        for(int a = -90; a < 270; a = a + angleStep) {
+            canvas.drawArc(padding,padding,textSize-2*padding,textSize-2*padding, a, angleStep,true,circlePaint);
+        }
+        return image;
     }
 }

@@ -82,11 +82,11 @@ public class ClockView extends View {
         // set sector color
         sectorPaint.setColor(getColorFromPercent(1-value/n));
         int angleStep = 360 / n;
-        canvas.drawArc(padding,padding,diameter-2*padding,diameter-2*padding,0, angleStep *value,true,sectorPaint);
+        canvas.drawArc(padding,padding,diameter-2*padding,diameter-2*padding,-90, angleStep *value,true,sectorPaint);
 
         // draw as many arc as the sector number
-        for(int a = 0; a < 360; a = a + angleStep) {
-            canvas.drawArc(padding,padding,diameter-2*padding,diameter-2*padding, a,a+ angleStep,true,circlePaint);
+        for(int a = -90; a < 270; a = a + angleStep) {
+            canvas.drawArc(padding,padding,diameter-2*padding,diameter-2*padding, a, angleStep,true,circlePaint);
         }
     }
 
