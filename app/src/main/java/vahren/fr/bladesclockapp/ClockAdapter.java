@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridLayout;
 import android.widget.GridView;
 
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ class ClockAdapter extends BaseAdapter {
         return v;
     }
 
-    public void addNewClock(int nbSector, int color, String name) {
-        clocks.add(new Clock(context,nbSector,color, name));
+    public void addNewClock(int nbSector, String name) {
+        clocks.add(new Clock(context,nbSector, name));
     }
 }

@@ -1,5 +1,6 @@
 package vahren.fr.bladesclockapp;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -51,9 +52,9 @@ public class MainActivity extends AppCompatActivity {
         this.clocks = new ClockAdapter(this);
 
         // TEST
-        clocks.addNewClock(4,0xff0, "Exemple clock 1");
-        clocks.addNewClock(6,0x0f0, "Exemple clock 2");
-        clocks.addNewClock(8,0x0ff, "Exemple clock 3");
+        clocks.addNewClock(4,  "Exemple clock 1");
+        clocks.addNewClock(6, "Exemple clock 2");
+        clocks.addNewClock(8, "Exemple clock 3");
         grid.setAdapter(clocks);
 
     }
