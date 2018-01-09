@@ -8,8 +8,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.GridView;
 
 public class MainActivity extends AppCompatActivity {
+
+
+    private GridView grid;
+    private ClockAdapter clocks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +33,29 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        this.grid = findViewById(R.id.grid);
+        this.grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ((Clock)view).click();
+            }
+        });
+        this.grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ((Clock)view).longClick();
+                return true;
+            }
+        });
+
+        this.clocks = new ClockAdapter(this);
+
+        // TEST
+        clocks.addNewClock(4,0xff0, "Exemple clock 1");
+        clocks.addNewClock(6,0x0f0, "Exemple clock 2");
+        clocks.addNewClock(8,0x0ff, "Exemple clock 3");
+        grid.setAdapter(clocks);
+
     }
 
     @Override
