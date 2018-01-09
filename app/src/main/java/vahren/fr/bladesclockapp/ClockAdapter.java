@@ -49,6 +49,7 @@ class ClockAdapter extends BaseAdapter {
 
     public void addNewClock(int nbSector, String name, boolean score, boolean pc, boolean general, boolean hidden) {
         clocks.add(new Clock(context,nbSector, name, score, pc, general, hidden));
+        updateFilteredList();
     }
 
     private void updateFilteredList(){

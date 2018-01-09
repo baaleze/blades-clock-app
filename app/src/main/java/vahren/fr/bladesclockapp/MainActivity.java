@@ -243,11 +243,12 @@ public class MainActivity extends AppCompatActivity implements CreateClockMenu.C
                 ((CheckBox)dialog.getDialog().findViewById(R.id.PC)).isChecked(),
                 ((CheckBox)dialog.getDialog().findViewById(R.id.general)).isChecked(),
                 ((CheckBox)dialog.getDialog().findViewById(R.id.hidden)).isChecked());
+        showFabMenu();
     }
 
     @Override
     public void onDialogNegativeClick(CreateClockMenu dialog) {
-        // NOTHING
+        showFabMenu();
     }
 
 
@@ -255,6 +256,8 @@ public class MainActivity extends AppCompatActivity implements CreateClockMenu.C
 
 
         Paint circlePaint = new Paint(ANTI_ALIAS_FLAG);
+        circlePaint.setStyle(Paint.Style.STROKE);
+        circlePaint.setStrokeWidth(1);
         circlePaint.setColor(textColor);
         int padding = 2;
         int width = 2*padding + textSize; // round

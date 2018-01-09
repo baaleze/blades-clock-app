@@ -5,18 +5,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-
-import static android.graphics.Paint.ANTI_ALIAS_FLAG;
-
-/**
- * Created by fdroumaguet on 09/01/18.
- */
 
 public class CreateClockMenu extends DialogFragment {
 
