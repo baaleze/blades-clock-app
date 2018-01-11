@@ -29,6 +29,7 @@ import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 public class MainActivity extends AppCompatActivity implements CreateClockMenu.CreateClockMenuListener {
 
 
+    public static final int CLOCK_ICON_SIZE = 50;
     private GridView grid;
     private ClockAdapter clocks;
     private boolean showingMenu = true;
@@ -40,9 +41,9 @@ public class MainActivity extends AppCompatActivity implements CreateClockMenu.C
     private Animation hide_fab_3;
 
 
-    private final Bitmap fab4 = bitmapClock(4,40, Color.WHITE);
-    private final Bitmap fab6 = bitmapClock(6,40, Color.WHITE);
-    private final Bitmap fab8 = bitmapClock(8,40, Color.WHITE);
+    private final Bitmap fab4 = bitmapClock(4, CLOCK_ICON_SIZE, Color.WHITE);
+    private final Bitmap fab6 = bitmapClock(6, CLOCK_ICON_SIZE, Color.WHITE);
+    private final Bitmap fab8 = bitmapClock(8, CLOCK_ICON_SIZE, Color.WHITE);
 
 
     @Override
@@ -253,8 +254,6 @@ public class MainActivity extends AppCompatActivity implements CreateClockMenu.C
 
 
     public static Bitmap bitmapClock(int n, int textSize, int textColor) {
-
-
         Paint circlePaint = new Paint(ANTI_ALIAS_FLAG);
         circlePaint.setStyle(Paint.Style.STROKE);
         circlePaint.setStrokeWidth(1);
