@@ -1,28 +1,29 @@
 package vahren.fr.bladesclockapp;
 
 import android.app.DialogFragment;
+import android.arch.persistence.room.Room;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
-import android.widget.TextView;
+
+import java.util.List;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 
@@ -44,14 +45,13 @@ public class MainActivity extends AppCompatActivity implements CreateClockMenu.C
     private final Bitmap fab4 = bitmapClock(4, CLOCK_ICON_SIZE, Color.WHITE);
     private final Bitmap fab6 = bitmapClock(6, CLOCK_ICON_SIZE, Color.WHITE);
     private final Bitmap fab8 = bitmapClock(8, CLOCK_ICON_SIZE, Color.WHITE);
+    private ClockDB db;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         // ANIMATIONS
         show_fab_1 = AnimationUtils.loadAnimation(this, R.anim.fab1_show);
@@ -129,21 +129,66 @@ public class MainActivity extends AppCompatActivity implements CreateClockMenu.C
         this.grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ((Clock)view).click();
+                ((Clock)view).increaseValue();
+                // save
+                save((Clock)view);
+                printClocks();
             }
         });
         this.grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ((Clock)view).longClick();
+                boolean delete = ((Clock)view).decreaseValue();
+                if(delete) {
+                    delete((Clock)view);
+                }else{
+                    // save
+                    save((Clock)view);
+                }
+                printClocks();
                 return true;
             }
         });
 
         this.clocks = new ClockAdapter(this);
-        grid.setAdapter(clocks);
+        grid.setAdapter(this.clocks);
 
+        // DATA
+        db = Room.databaseBuilder(this, ClockDB.class, "clock-db")
+                .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
+                .build();
+        // LOAD
+        List<ClockEntity> clocks = db.clockDao().getAll();
+        for(ClockEntity ce: clocks){
+            load(ce);
+        }
     }
+
+    private void printClocks() {
+        for(ClockEntity ce :db.clockDao().getAll()){
+            Log.d("BCA",ce.toString());
+        }
+    }
+
+    private void load(ClockEntity ce) {
+        this.clocks.loadClock(new Clock(this, ce));
+    }
+
+    private void delete(Clock view) {
+        db.clockDao().delete(view.toEntity());
+        this.clocks.delete(view);
+    }
+
+    private void save(Clock view) {
+        db.clockDao().update(view.toEntity());
+    }
+
+
+    private long create(Clock newClock) {
+        return db.clockDao().insert(newClock.toEntity());
+    }
+
 
     private void showAddClockMenu(int nbSector) {
         // show popup with one field for name
@@ -237,13 +282,16 @@ public class MainActivity extends AppCompatActivity implements CreateClockMenu.C
 
     @Override
     public void onDialogPositiveClick(CreateClockMenu dialog) {
-
-        clocks.addNewClock(dialog.nbSector,
+        // create a new clock
+        Clock newClock = clocks.addNewClock(dialog.nbSector,
                 ((EditText)dialog.getDialog().findViewById(R.id.nameInput)).getText().toString(),
                 ((CheckBox)dialog.getDialog().findViewById(R.id.score)).isChecked(),
                 ((CheckBox)dialog.getDialog().findViewById(R.id.PC)).isChecked(),
                 ((CheckBox)dialog.getDialog().findViewById(R.id.general)).isChecked(),
-                ((CheckBox)dialog.getDialog().findViewById(R.id.hidden)).isChecked());
+                ((CheckBox)dialog.getDialog().findViewById(R.id.hidden)).isChecked(), 0);
+        // insert it in DB
+        newClock.id = create(newClock);
+        // hide FABs
         showFabMenu();
     }
 

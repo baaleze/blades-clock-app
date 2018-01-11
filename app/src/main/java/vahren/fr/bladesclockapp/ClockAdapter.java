@@ -1,15 +1,17 @@
 package vahren.fr.bladesclockapp;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class ClockAdapter extends BaseAdapter {
+class ClockAdapter extends ArrayAdapter<Clock> {
 
     private final Context context;
 
@@ -22,6 +24,7 @@ class ClockAdapter extends BaseAdapter {
     private List<Clock> filtered = new ArrayList<>(0);
 
     public ClockAdapter(Context context) {
+        super(context,0);
         this.context = context;
     }
 
@@ -31,7 +34,7 @@ class ClockAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int i) {
+    public Clock getItem(int i) {
         return filtered.get(i);
     }
 
@@ -40,15 +43,23 @@ class ClockAdapter extends BaseAdapter {
         return 0;
     }
 
+    @NonNull
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        View v = filtered.get(i);
-        v.setLayoutParams(new GridView.LayoutParams(400,400));
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        View v = filtered.get(position);
+        v.setLayoutParams(new GridView.LayoutParams(600,700));
         return v;
     }
 
-    public void addNewClock(int nbSector, String name, boolean score, boolean pc, boolean general, boolean hidden) {
-        clocks.add(new Clock(context,nbSector, name, score, pc, general, hidden));
+    public Clock addNewClock(int nbSector, String name, boolean score, boolean pc, boolean general, boolean hidden, long id) {
+        Clock c = new Clock(context,nbSector, name, score, pc, general, hidden, id);
+        clocks.add(c);
+        updateFilteredList();
+        return c;
+    }
+
+    public void loadClock(Clock c){
+        clocks.add(c);
         updateFilteredList();
     }
 
@@ -112,6 +123,11 @@ class ClockAdapter extends BaseAdapter {
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
+        updateFilteredList();
+    }
+
+    public void delete(Clock view) {
+        clocks.remove(view);
         updateFilteredList();
     }
 }

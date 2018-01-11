@@ -12,10 +12,9 @@ public class ClockView extends View {
 
 
     private static final int padding = 10;
-    private static final float TEXT_PAD = 60;
+    private static final float TEXT_PAD = 100;
 
     private float diameter;
-    private float value;
 
     private Paint circlePaint;
     private Paint sectorPaint;
@@ -27,14 +26,9 @@ public class ClockView extends View {
     public ClockView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        this.value = 0;
-
         // INIT
         this.circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        this.circlePaint.setStrokeWidth(5);
-        this.circlePaint.setColor(Color.BLACK);
         this.circlePaint.setStyle(Paint.Style.STROKE);
-
 
         this.sectorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         this.sectorPaint.setStyle(Paint.Style.FILL);
@@ -50,9 +44,6 @@ public class ClockView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        // Account for padding
-        float xpad = (float)(getPaddingLeft() + getPaddingRight());
-        float ypad = (float)(getPaddingTop() + getPaddingBottom());
 
         float ww = (float)w ;
         float hh = (float)h - TEXT_PAD;
@@ -73,14 +64,15 @@ public class ClockView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         // set sector color
-        sectorPaint.setColor(getColorFromPercent(1-value/clock.nbSector));
+        sectorPaint.setColor(getColorFromPercent(1-clock.value/clock.nbSector));
         int angleStep = 360 / clock.nbSector;
         canvas.drawArc(w/2-diameter/2+padding,
                 h/2-diameter/2+padding,
                 w/2+diameter/2-padding,
                 h/2+diameter/2-padding,
-                -90, angleStep *value,true,sectorPaint);
+                -90, angleStep *clock.value,true,sectorPaint);
 
+        circlePaint.setStrokeWidth(5);
         circlePaint.setColor(Color.BLACK);
         // draw as many arc as the sector number
         for(int a = -90; a < 270; a = a + angleStep) {
@@ -91,6 +83,7 @@ public class ClockView extends View {
                     a, angleStep,true,circlePaint);
         }
 
+        circlePaint.setStrokeWidth(10);
         // TAGS
         if(clock.score){
             circlePaint.setColor(getResources().getColor(android.R.color.holo_red_dark));
@@ -126,24 +119,7 @@ public class ClockView extends View {
         canvas.drawText(clock.name,w/2,diameter+TEXT_PAD/2,textPaint);
     }
 
-    public void increaseValue() {
-        if(value == clock.nbSector){
-            // max was attained reset to 0
-            value = 0;
-        }else{
-            value++;
-        }
-        invalidate();
-    }
 
-    public void decreaseValue() {
-        value = Math.max(0,value-1);
-        invalidate();
-    }
-
-    public float getValue() {
-        return value;
-    }
 
     public void setClock(Clock clock) {
         this.clock = clock;
